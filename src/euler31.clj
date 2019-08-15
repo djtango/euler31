@@ -9,44 +9,11 @@
 ;; 1×£1 + 1×50p + 2×20p + 1×5p + 1×2p + 3×1p
 ;; How many different ways can £2 be made using any number of coins?
 
-(def denom->value
-  "coins represented in terms of pence (the smallest possible denom)"
-  {:1p 1
-   :2p 2
-   :5p 5
-   :10p 10
-   :20p 20
-   :50p 50
-   :1pound 100
-   :2pound 200})
-
-(def value->denom
-  (set/map-invert denom->value))
-
 (def denoms [200 100 50 20 10 5 2 1]) ;; sorted
 (def denoms-2 [5 2 1]) ;; sorted
 
-(def except-1 butlast)
-
-;; (defn try-deduct []
-;;   (if (>= x current-denom)
-;;         (recur (- x current-denom)
-;;                (update result d inc)
-;;                denoms
-;;                d)
-;;         (if (> x 0)
-;;           (recur x
-;;                  (inc d)
-;;                  denoms
-;;                  result)
-;;           result)))
-;;
-
 (defn solution [x result denoms]
   (->> denoms
-       ;; (map (fn [denom] (remove #{denom} denoms))) ;; finding 'suboptimal'
-       ;; except-1 ;; remove the one which lost 1
-       ;; (concat [denoms])
        (map (fn [d]
               (if (>= x d)
                 (solution (- x d)

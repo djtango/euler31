@@ -26,112 +26,24 @@
 
 (def into-2-pounds #(bounds % 200))
 
-;; (comment
-;; (println
-;;   (let [denoms [5 2 1]
-;;         target 7
-;;         denom->bounds (zipmap denoms (mapv #(bounds % target) denoms))
-;;         branch {}
-;;         path []
-;;         result {:branch branch
-;;                 :path path}] ;; smaller problem
-;;   (let [current-denom (apply max denoms)
-;;         coeffs (denom->bounds current-denom)] ;; for each value of biggest denom
-;;     (assoc-in result
-;;               current-denom
-;;               (reduce (fn [branch c]
-;;                         (let [denoms (vec (rest denoms))
-;;                               target (- target (* c current-denom))
-;;                               denom->bounds (->> denoms
-;;                                                  (mapv (fn [d]
-;;                                                          [d (bounds d target)]))
-;;                                                  (into {}))]
-;;                           (let [current-denom (apply max denoms)
-;;                                 coeffs (denom->bounds current-denom)]
-;;                             (reduce (fn [branch c]
-;;                                       (let [denoms (vec (rest denoms))
-;;                                             target (- target (* c current-denom))
-;;                                             denom->bounds (->> denoms
-;;                                                                (mapv (fn [d]
-;;                                                                        [d (bounds d target)]))
-;;                                                                (into {}))]
-;;                                         (let [current-denom (apply max denoms)
-;;                                               coeffs (denom->bounds current-denom)]
-;;                                           (reduce (fn [branch c]
-;;                                                     (let [denoms (vec (rest denoms))
-;;                                                           target (- target (* c current-denom))
-;;                                                           denom->bounds (->> denoms
-;;                                                                              (mapv (fn [d]
-;;                                                                                      [d (bounds d target)]))
-;;                                                                              (into {}))]
-;;                                                       (conj branch c)))
-;;                                                   (conj branch c)
-;;                                                   coeffs))))
-;;                                     (conj branch c)
-;;                                     coeffs))))
-;;                       path
-;;                       coeffs))))
-;;   )
-;; ;; )
-;;
-;; (let [denoms [5 2 1]
-;;       target 7
-;;       denom->bounds (zipmap denoms (mapv #(bounds % target) denoms))
-;;       branch []] ;; smaller problem
-;;   (let [current-denom (apply max denoms)
-;;         coeffs (denom->bounds current-denom)] ;; for each value of biggest denom
-;;     (reduce (fn [branch c]
-;;               (let [denoms2 (vec (rest denoms))
-;;                     target (- target (* c current-denom))
-;;                     denom->bounds (->> denoms2
-;;                                        (mapv (fn [d]
-;;                                                [d (bounds d target)]))
-;;                                        (into {}))]
-;;                 (let [current-denom (apply max denoms)
-;;                       coeffs (denom->bounds current-denom)])))
-;;             branch
-;;             coeffs)))
-
-(defn x [denoms target denom->bounds result]
-  (let [current-denom (apply max denoms)
-        coeffs (denom->bounds current-denom)] ;; for each value of biggest denom
+(defn find-denominations [denoms target denom->bounds result]
+  (let [largest-denom (apply max denoms)
+        coeffs (denom->bounds largest-denom)] ;; for each value of biggest denom
     (reduce (fn [result c]
               (if (seq (rest denoms))
                 (let [denoms (vec (rest denoms))
-                      target (- target (* c current-denom))
+                      target (- target (* c largest-denom))
                       denom->bounds (->> denoms
                                          (mapv (fn [d]
                                                  [d (bounds d target)]))
                                          (into {}))]
-                  (let [current-denom (apply max denoms)
-                        coeffs (denom->bounds current-denom)]
-                    (conj result c (x denoms target denom->bounds []))))
+                  (let [largest-denom (apply max denoms)
+                        coeffs (denom->bounds largest-denom)]
+                    (conj result c (find-denominations denoms target denom->bounds []))))
                 [c]))
             result
             coeffs)))
-;;
-;; (defn flatten-result [denoms result]
-;;   (loop [[d & denoms] denoms]
-;;     (if d
-;;       ())
-;;     (recur)))
-;;
 
-
-
-
-;; (defn tree-reduce [leaf-fn leaf? t]
-;;   (loop [path []
-;;          t t
-;;          result []]
-;;     (if (leaf? t)
-;;       (conj result (leaf-fn t))
-;;       (let [[value left right] t]
-;;         (recur (conj path value)
-;;                right
-;;                (recur (conj path value)
-;;                       result))))))
-;;
 (defn tree-reduce
   "depth-first"
   [left right value leaf-fn rf t]
@@ -162,7 +74,7 @@
     ;;  1 [0 [2]
     ;;     1 [0]]]
 
-    (->> (x denoms target denom->bounds result)
+    (->> (find-denominations denoms target denom->bounds result)
          (tree-reduce
            left
            right

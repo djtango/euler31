@@ -88,4 +88,22 @@
            conj)
          (remove nil?))))
 
-(time (println (count (solution [200 100 50 20 10 5 2 1] 200))))
+(defn dbg [f] (fn [& args]
+               (println args)
+               (let [r (apply f args)]
+                 (println r)
+                 r)))
+
+;; (time (println (count (solution [200 100 50 20 10 5 2 1] 200))))
+(time (println
+        (let [denoms [5 2 1]
+              target 7
+              denom->bounds (zipmap denoms (mapv #(bounds % target) denoms))]
+          (let [left (dbg second)
+                right (dbg (comp next next))]
+            (tree-seq #(or (number? %)
+                           (= (count %) 1)
+                           (not (and (nil? (left %))
+                                     (nil? (right %)))))
+                      #(concat (left %) [(first %)] (right %))
+            (find-denominations denoms target denom->bounds []))))))
